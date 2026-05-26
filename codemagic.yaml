@@ -1,0 +1,90 @@
+workflows:
+  ecomarket-flutter-android-debug:
+    name: EcoMarket Flutter Android Debug
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      groups:
+        - ecomarket
+      flutter: stable
+      vars:
+        VITE_ECOMARKET_API_BASE_URL: https://store.ecomarket.uno/api/v2
+        VITE_ECOMARKET_CLIENT_API_BASE_URL: https://store.ecomarket.uno/api/v2/client
+        VITE_LOGIHUB_BASE_URL: https://my.logihub.tech/api/v2
+        APP_URL: https://store.ecomarket.uno
+        VITE_APP_URL: https://store.ecomarket.uno
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+        - ~/.gradle/caches
+    scripts:
+      - name: Install Flutter dependencies
+        script: flutter pub get
+      - name: Check required keys
+        script: |
+          test -n "$VITE_ECOMARKET_API_KEY" || (echo "Missing VITE_ECOMARKET_API_KEY" && exit 1)
+          test -n "$VITE_LOGIHUB_API_KEY" || (echo "Missing VITE_LOGIHUB_API_KEY" && exit 1)
+          test -n "$VITE_GOOGLE_MAPS_PLATFORM_KEY" || (echo "Missing VITE_GOOGLE_MAPS_PLATFORM_KEY" && exit 1)
+      - name: Analyze Flutter project
+        script: flutter analyze --no-fatal-infos --no-fatal-warnings || true
+      - name: Build Android debug APK
+        script: |
+          flutter build apk --debug \
+            --dart-define=APP_URL=$APP_URL \
+            --dart-define=VITE_APP_URL=$VITE_APP_URL \
+            --dart-define=VITE_ECOMARKET_API_BASE_URL=$VITE_ECOMARKET_API_BASE_URL \
+            --dart-define=VITE_ECOMARKET_CLIENT_API_BASE_URL=$VITE_ECOMARKET_CLIENT_API_BASE_URL \
+            --dart-define=VITE_ECOMARKET_API_KEY=$VITE_ECOMARKET_API_KEY \
+            --dart-define=VITE_LOGIHUB_BASE_URL=$VITE_LOGIHUB_BASE_URL \
+            --dart-define=VITE_LOGIHUB_API_KEY=$VITE_LOGIHUB_API_KEY \
+            --dart-define=GOOGLE_MAPS_PLATFORM_KEY=$GOOGLE_MAPS_PLATFORM_KEY \
+            --dart-define=VITE_GOOGLE_MAPS_PLATFORM_KEY=$VITE_GOOGLE_MAPS_PLATFORM_KEY
+    artifacts:
+      - build/app/outputs/flutter-apk/**/*.apk
+      - build/app/outputs/**/*.aab
+      - build/app/outputs/**/mapping.txt
+
+  ecomarket-flutter-android-release-aab:
+    name: EcoMarket Flutter Android Release AAB unsigned
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      groups:
+        - ecomarket
+      flutter: stable
+      vars:
+        VITE_ECOMARKET_API_BASE_URL: https://store.ecomarket.uno/api/v2
+        VITE_ECOMARKET_CLIENT_API_BASE_URL: https://store.ecomarket.uno/api/v2/client
+        VITE_LOGIHUB_BASE_URL: https://my.logihub.tech/api/v2
+        APP_URL: https://store.ecomarket.uno
+        VITE_APP_URL: https://store.ecomarket.uno
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+        - ~/.gradle/caches
+    scripts:
+      - name: Install Flutter dependencies
+        script: flutter pub get
+      - name: Check required keys
+        script: |
+          test -n "$VITE_ECOMARKET_API_KEY" || (echo "Missing VITE_ECOMARKET_API_KEY" && exit 1)
+          test -n "$VITE_LOGIHUB_API_KEY" || (echo "Missing VITE_LOGIHUB_API_KEY" && exit 1)
+          test -n "$VITE_GOOGLE_MAPS_PLATFORM_KEY" || (echo "Missing VITE_GOOGLE_MAPS_PLATFORM_KEY" && exit 1)
+      - name: Analyze Flutter project
+        script: flutter analyze --no-fatal-infos --no-fatal-warnings || true
+      - name: Build unsigned release bundle
+        script: |
+          flutter build appbundle --release \
+            --dart-define=APP_URL=$APP_URL \
+            --dart-define=VITE_APP_URL=$VITE_APP_URL \
+            --dart-define=VITE_ECOMARKET_API_BASE_URL=$VITE_ECOMARKET_API_BASE_URL \
+            --dart-define=VITE_ECOMARKET_CLIENT_API_BASE_URL=$VITE_ECOMARKET_CLIENT_API_BASE_URL \
+            --dart-define=VITE_ECOMARKET_API_KEY=$VITE_ECOMARKET_API_KEY \
+            --dart-define=VITE_LOGIHUB_BASE_URL=$VITE_LOGIHUB_BASE_URL \
+            --dart-define=VITE_LOGIHUB_API_KEY=$VITE_LOGIHUB_API_KEY \
+            --dart-define=GOOGLE_MAPS_PLATFORM_KEY=$GOOGLE_MAPS_PLATFORM_KEY \
+            --dart-define=VITE_GOOGLE_MAPS_PLATFORM_KEY=$VITE_GOOGLE_MAPS_PLATFORM_KEY
+    artifacts:
+      - build/app/outputs/bundle/**/*.aab
+      - build/app/outputs/flutter-apk/**/*.apk
+      - build/app/outputs/**/mapping.txt
